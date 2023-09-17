@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+  }
+  
+  datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+  }
+  
+  model Histori_login {
+    id         Int      @id @default(autoincrement())
+    user       User     @relation(fields: [userId], references: [id])
+    userId    Int
+    last_login DateTime @default(now())
+  }
+  
+  model Jadwal {
+    id          Int      @id @default(autoincrement())
+    hari        String   
+    jumlah_sesi Int
+    lama_sesi   Int
+    jam_mulai   DateTime @db.Time
+    Penjadwalan Penjadwalan[]
+  }
+  
+  model Jadwal_khusus {
+    id         Int    @id @default(autoincrement())
+    kelas      String @db.VarChar(20)
+    keterangan String 
+    sesi       String @db.VarChar(20)
+    hari       String @db.VarChar(20)
+    durasi     Int
+  }
+  
+  model Master_agama {
+    id         Int    @id @default(autoincrement())
+    nama_agama String
+    pengajar Pengajar[]
+    peserta Peserta[]
+  }
+  
+  model Jenis_pelatihan {
+    id             Int     @id @default(autoincrement())
+    nama_pelatihan String?
+    kode_pelatihan String
+  }
+  
+  model Master_jurusan {
+    id           Int    @id @default(autoincrement())
+    nama_jurusan String
+    master_kelas Master_kelas[]
+    master_pelajaran Master_pelajaran[]
+  }
+  
+  model Master_kelas {
+    id             Int            @id @default(autoincrement())
+    nama_kelas     String
+    kelas          String         @db.VarChar(20)
+    master_jurusan Master_jurusan @relation(fields: [id_jurusan], references: [id])
+    id_jurusan     Int
+    penjadwalan Penjadwalan[]
+    rumusan Rumusan[]
+  }
+  
+  model Master_pangkat {
+    id            Int     @id @default(autoincrement())
+    nama_pangkat  String?
+    nama_golongan String
+    pengajar Pengajar[]
+    peserta Peserta[]
+  }
+  
+  model Master_pelajaran {
+    id             Int            @id @default(autoincrement())
+    kode_mapel     String
+    nama_mapel     String
+    kelompok_mapel String
+    kelas          String //foreign key dari tabel master_kelas 
+    beban_jam      Int
+    master_jurusan Master_jurusan @relation(fields: [id_jurusan], references: [id])
+    id_jurusan     Int
+    cost           Int
+    Penjadwalan Penjadwalan[]
+  }
+  
+  model Role {
+    id        Int    @id @default(autoincrement())
+    nama_role String
+  }
+  
+  model Pengajar {
+    id                  Int                @id @default(autoincrement())
+    nama_pengajar       String
+    jenis_kelamin       String
+    nik                 String             @db.VarChar(16)
+    ttl                 DateTime
+    nama_ibu            String
+    nip                 String             @unique
+    email               String             @unique
+    master_pangkat      Master_pangkat     @relation(fields: [id_pangkat], references: [id])
+    id_pangkat          Int
+    jabatan             String
+    unit_kerja          String             @db.VarChar(255)
+    nama_instansi       String             @db.VarChar(255)
+    alamat_instansi     String             @db.Text
+    no_telepon_instansi String             @db.VarChar(20)
+    master_agama        Master_agama       @relation(fields: [id_agama], references: [id])
+    id_agama            Int
+    status_kawin        Status_kawin       
+    hobi                String             @db.Text
+    alamat              String             @db.Text
+    foto                String?            @db.Text
+    pendidikan_sd       String
+    pendidikan_smp      String
+    pendidikan_sma      String
+    pendidikan_d3       String
+    pendidikan_s1       String
+    pendidikan_s2       String
+    pendidikan_s3       String
+    status_kepegawaian  Status_kepegawaian
+    createdAt           DateTime           @default(now())
+    updatedAt           DateTime           @default(now())
+    penjadwalan Penjadwalan[]
+    request_jadwal Request_jadwal[]
+    Rumusan Rumusan[]
+  }
+  
+  model Peserta {
+    id                  Int                @id @default(autoincrement())
+    nama_peserta        String
+    jenis_kelamin       String
+    nik                 String             @db.VarChar(16)
+    ttl                 DateTime
+    nama_ibu            String
+    nip                 String             @unique
+    email               String             @unique
+    master_pangkat      Master_pangkat     @relation(fields: [id_pangkat], references: [id])
+    id_pangkat          Int
+    jabatan             String
+    unit_kerja          String             @db.VarChar(255)
+    nama_instansi       String             @db.VarChar(255)
+    alamat_instansi     String             @db.Text
+    no_telepon_instansi String             @db.VarChar(20)
+    master_agama        Master_agama       @relation(fields: [id_agama], references: [id])
+    id_agama Int
+    status_kawin        Status_kawin       
+    hobi                String             @db.Text
+    alamat              String             @db.Text
+    foto                String?            @db.Text
+    pendidikan_sd       String
+    pendidikan_smp      String
+    pendidikan_sma      String
+    pendidikan_d3       String
+    pendidikan_s1       String
+    pendidikan_s2       String
+    pendidikan_s3       String
+    status_kepegawaian  Status_kepegawaian
+    createdAt           DateTime           @default(now())
+    updatedAt           DateTime           @default(now())
+  }
+  
+  enum Status_kawin {
+    belumKawin
+    sudahKawin
+    ceraiHidup
+    ceraiMati
+  }
+  
+  enum Status_kepegawaian {
+    CPNS
+    PEJABAT_STRUKTURAL
+    TENAGA_AHLI
+  }
+  
+  model Penjadwalan {
+    id               Int              @id @default(autoincrement())
+    master_kelas     Master_kelas     @relation(fields: [id_kelas], references: [id])
+    id_kelas         Int
+    pengajar         Pengajar         @relation(fields: [id_pengajar], references: [id])
+    id_pengajar      Int
+    master_pelajaran Master_pelajaran @relation(fields: [id_mapel], references: [id])
+    id_mapel         Int
+    hari             String
+    sesi             Int
+    jadwal           Jadwal           @relation(fields: [id_jadwal], references: [id])
+    id_jadwal        Int
+    keterangan       String
+    jam_mulai        DateTime         @db.Time()
+    jam_selesai      DateTime         @db.Time()
+  }
+  
+  model Request_jadwal {
+    id          Int      @id @default(autoincrement())
+    pengajar    Pengajar @relation(fields: [id_pengajar], references: [id])
+    id_pengajar Int
+    hari        String
+  }
+  
+  model Rumusan {
+    id             Int            @id @default(autoincrement())
+    pengajar       Pengajar       @relation(fields: [id_pengajar], references: [id])
+    id_pengajar    Int
+    hari_request   String         @db.VarChar(255)
+    master_kelas   Master_kelas   @relation(fields: [id_kelas], references: [id])
+    id_kelas          Int
+    total          Int
+    beban_kerja    Int
+    pendapatan     Int
+    hasil_rumusan  Float
+  }
+  
+  model User {
+    id          Int      @id @default(autoincrement())
+    nama        String?
+    nip         Int      
+    id_pengajar Int?
+    id_peserta  Int?
+    password    String?
+    email       String   @unique
+    history_login Histori_login[]
+  }
+  
